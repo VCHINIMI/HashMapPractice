@@ -1,28 +1,49 @@
 package hashTable;
 
-public class MyHashMap<K, V> {
+import java.util.ArrayList;
+import java.util.List;
 
-	MyLinkedList<K> myLinkedList;
+public class MyHashMap<K, V> {
+	private final int numBuckets;
+	List<MyLinkedList<K>> myBucketArray;
 
 	public MyHashMap() {
-		this.myLinkedList = new MyLinkedList<>();
+		this.numBuckets = 10;
+		this.myBucketArray = new ArrayList<MyLinkedList<K>>();
+		for (int i = 0; i < numBuckets; i++)
+			myBucketArray.add(null);
 	}
 
-	// Getting value for key
+	// implementing hash function to find index for key
+	public int getBucketIndex(K key) {
+		int hashCode = Math.abs(key.hashCode());
+		return hashCode % numBuckets;
+	}
+
+	// finding value for key:
 	public V get(K key) {
-		MyMapNode<K, V> myMapNode = (MyMapNode<K, V>) this.myLinkedList.search(key);
+		int index = getBucketIndex(key);
+		MyLinkedList<K> myLinkedList = myBucketArray.get(index);
+		if (myLinkedList == null)
+			return null;
+		MyMapNode<K, V> myMapNode = (MyMapNode<K, V>) myLinkedList.search(key);
 		return (myMapNode == null) ? null : myMapNode.getValue();
 	}
 
-	// Adding value to key in hash table
-	public void add(K word, V value) {
-		MyMapNode<K, V> myMapNode = (MyMapNode<K, V>) this.myLinkedList.search(word);
-		;
+	// adding key and value
+	public void add(K key, V value) {
+		int index = getBucketIndex(key);
+		MyLinkedList<K> myLinkedList = myBucketArray.get(index);
+		if (myLinkedList == null) {
+			myLinkedList = new MyLinkedList<>();
+			myBucketArray.set(index, myLinkedList);
+		}
+		MyMapNode<K, V> myMapNode = (MyMapNode<K, V>) myLinkedList.search(key);
 		if (myMapNode == null) {
-			myMapNode = new MyMapNode<K, V>(word, value);
-			this.myLinkedList.append(myMapNode);
-		} else
+			myMapNode = new MyMapNode<K, V>(key, value);
+			myLinkedList.append(myMapNode);
+		} else {
 			myMapNode.setValue(value);
+		}
 	}
-
 }
